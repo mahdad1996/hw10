@@ -19,17 +19,18 @@ public class ArticleApp {
     public static void main(String[] args) {
         SessionFactory session = HibernateUtil.getSession();
         Session mySession = session.openSession();
-        mySession.beginTransaction();
+
         boolean condition = true;
         Scanner in= new Scanner(System.in);
         while (condition){
                 if(AuthenticationService.getInstance().getLoginUser()==null){
                     int msgCode=0;
-                    System.out.println("what do you want? 1.register | 2.login");
+                    System.out.println("what do you want? 1.register | 2.login | 3.Show All Articles");
                     Scanner input = new Scanner(System.in);
                     msgCode = input.nextInt();
                     switch (msgCode){
                         case 1:{
+                            mySession.beginTransaction();
                             System.out.println("Enter Username:");
                             String username = input.next();
                             System.out.println("Enter National Code:");
@@ -47,9 +48,11 @@ public class ArticleApp {
                             Long id = (Long)  mySession.save(user);
                             mySession.getTransaction().commit();
                             System.out.println("user saved! "+id);
+                            break;
 
                         }
                         case 2:{
+                            mySession.beginTransaction();
                             System.out.println("enter username:");
                             String username = input.next();
                             System.out.println("enter password:");
@@ -66,27 +69,41 @@ public class ArticleApp {
                                 System.out.println("logged in as "+ user.getUsername());
                                 AuthenticationService.getInstance().setLoginUser(user);
                             }
+                            break;
 
+                        }
+                        case 3:{
+                            mySession.beginTransaction();
+                            Query<Article> query = mySession.createQuery("from Article");
+                            List<Article> articles ;
+                            articles = query.list();
+                            mySession.getTransaction().commit();
+                            articles.forEach(System.out::println);
+                            break;
                         }
                     }
                 }
                 else if(AuthenticationService.getInstance().getLoginUser()!=null){
 
                     System.out.println("wellcome " + AuthenticationService.getInstance().getLoginUser().getUsername());
+
                     int msgCode=0;
                     System.out.println("what do you want?");
-                    System.out.println("1.show my Articles");
+                    System.out.println("1.Show My Articles");
                     System.out.println("2.Edit an Article");
-                    System.out.println("3.create new Article");
-                    System.out.println("4.change password");
-                    System.out.println("5.log out");
+                    System.out.println("3.Create new Article");
+                    System.out.println("4.Publish an Article");
+                    System.out.println("5.Change Password");
+                    System.out.println("6.Search for an Article");
+                    System.out.println("7.Log Out");
                     Scanner input = new Scanner(System.in);
                     msgCode = input.nextInt();
                     switch (msgCode){
                         case 1:{
                             mySession.beginTransaction();
-                            Query<Article> query = mySession.createQuery("from Article");
-                            List<Article> articles ;
+                            Query<Article> query = mySession.createQuery("from Article where user_id=:id");
+                            query.setParameter("id",AuthenticationService.getInstance().getLoginUser().getId());
+                            List<Article> articles;
                             articles = query.list();
                             mySession.getTransaction().commit();
                             articles.forEach(System.out::println);
@@ -164,7 +181,63 @@ public class ArticleApp {
                             Article article = new Article(title,brief,content,new Date(),new Date(),publishDate,isp,u,category );
                             mySession.save(article);
                             mySession.getTransaction().commit();
+                            break;
 
+                        }
+                        case 4:{
+                            mySession.beginTransaction();
+                            Query<Article> query = mySession.createQuery("from Article");
+                            List<Article> articles ;
+                            articles = query.list();
+                            mySession.getTransaction().commit();
+                            System.out.println("your articles:");
+                            articles.forEach(System.out::println);
+                            System.out.println("enter id to publish:");
+                            Long x = in.nextLong();
+                            mySession.beginTransaction();
+                            Article article = mySession.load(Article.class,x);
+                            article.setPublished(true);
+                            article.setPublishDate(new Date());
+                            article.setLastUpdateDate(new Date());
+                            mySession.update(article);
+                            mySession.getTransaction().commit();
+                            System.out.println("article published successfuly!");
+                            break;
+                        }
+                        case 5:{
+                            System.out.println("Enter new password:");
+                            String pass = in.next();
+                            Long id = AuthenticationService.getInstance().getLoginUser().getId();
+                            mySession.beginTransaction();
+                            User user = mySession.load(User.class,id);
+                            user.setPassword(pass);
+                            mySession.update(user);
+                            mySession.getTransaction().commit();
+                            break;
+
+                        }
+                        case 6:{
+                            System.out.println("Enter Author Name:");
+                            String author = in.next();
+                            System.out.println("Enter title:");
+                            String title = in.next();
+                            mySession.beginTransaction();
+                            Query<Article> query = mySession.createQuery("from Article where title=:title");
+                            query.setParameter("title",title);
+                            Article article;
+                            article=query.uniqueResult();
+
+                            mySession.getTransaction().commit();
+                            if(article!=null){
+                                System.out.println(article);
+                            }
+
+                            break;
+
+                        }
+                        case 7:{
+                            AuthenticationService.getInstance().setLoginUser(null);
+                            break;
                         }
                     }
                 }
