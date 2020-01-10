@@ -16,8 +16,12 @@
         <property name="show_sql">false</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
         <!-- Mapping -->
-        <mapping class="com.HW08.maktab32.entities.User"></mapping>
-        <mapping class="com.HW08.maktab32.entities.Article"></mapping>
-        <mapping class="com.HW08.maktab32.entities.Category"></mapping>
+        <mapping class="com.HW08.maktab32.entities.User"/>
+        <mapping class="com.HW08.maktab32.entities.Article"/>
+        <mapping class="com.HW08.maktab32.entities.Category"/>
+        <mapping class="com.HW08.maktab32.entities.Role"/>
+        <mapping class="com.HW08.maktab32.entities.Tag"/>
+        <mapping class="com.HW08.maktab32.entities.Address"/>
+
     </session-factory>
 </hibernate-configuration>

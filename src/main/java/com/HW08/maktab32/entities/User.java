@@ -9,7 +9,6 @@ import java.util.List;
 @Table(name = "user")
 public class User {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -29,6 +28,25 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Article> articles = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = { @JoinColumn(name = "uid") },
+            inverseJoinColumns = { @JoinColumn(name = "rid") }
+    )
+    private List<Role> roles = new ArrayList<>();
+
+    public List<Address> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<Address> addresses) {
+        this.addresses = addresses;
+    }
+
+    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    private List<Address> addresses = new ArrayList<>();
+
 
     public User(String username, String password, String nationalCode, Date birthday) {
         this.username = username;
@@ -39,6 +57,14 @@ public class User {
     }
 
     public User() {
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 
     public Long getId() {
@@ -99,5 +125,29 @@ public class User {
                 ", birthday=" + birthday +
                 ", articles=" + articles +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (username != null ? !username.equals(user.username) : user.username != null) return false;
+        if (password != null ? !password.equals(user.password) : user.password != null) return false;
+        if (nationalCode != null ? !nationalCode.equals(user.nationalCode) : user.nationalCode != null) return false;
+        if (birthday != null ? !birthday.equals(user.birthday) : user.birthday != null) return false;
+        return addresses != null ? addresses.equals(user.addresses) : user.addresses == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = username != null ? username.hashCode() : 0;
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (nationalCode != null ? nationalCode.hashCode() : 0);
+        result = 31 * result + (birthday != null ? birthday.hashCode() : 0);
+        result = 31 * result + (addresses != null ? addresses.hashCode() : 0);
+        return result;
     }
 }

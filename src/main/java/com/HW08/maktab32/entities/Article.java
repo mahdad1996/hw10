@@ -3,7 +3,9 @@ package com.HW08.maktab32.entities;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "article")
@@ -43,6 +45,13 @@ public class Article {
 
     @OneToOne(fetch = FetchType.LAZY)
     private Category category;
+    @ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+            name = "Article_tag",
+            joinColumns = { @JoinColumn(name = "aid") },
+            inverseJoinColumns = { @JoinColumn(name = "tid") }
+    )
+    private List<Tag> tags = new ArrayList<>();
 
     public Article(String title, String brief, String content, Date createDate, Date lastUpdateDate, Date publishDate, boolean isPublished, User user, Category category) {
         this.title = title;
@@ -57,6 +66,14 @@ public class Article {
     }
 
     public Article() {
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
     public Long getId() {
